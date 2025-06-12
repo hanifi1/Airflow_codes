@@ -4,9 +4,9 @@ from datetime import timedelta
 from airflow.models import DAG
 # Operators; you need this to write tasks!
 
-# from airflow.operators.bash_operator import BashOperator
-# from airflow.operators.python import PythonOperator
-# from airflow.operators.email import EmailOperator
+from airflow.operators.bash_operator import BashOperator
+from airflow.operators.python import PythonOperator
+from airflow.operators.email import EmailOperator
 
 from airflow.providers.standard.operators.bash import BashOperator
 from airflow.providers.standard.operators.python import PythonOperator
