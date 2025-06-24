@@ -30,3 +30,10 @@ dag = DAG(
     description='Apache Airflow Final Assignment',
     schedule_interval=timedelta(days=1),
 )
+
+
+unzip_date = BashOperator(
+    task_id='unzip_data',
+    bash_command='<some bashcommand>',
+    dag=dag,
+)
