@@ -10,6 +10,51 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.email import EmailOperator
 from airflow.utils.dates import days_ago
 
+def extract_data_from_csv():
+    input_path = f"{path_to_file}/vehicle-data.csv"
+    out_path = f"{path_to_file}/out/csv_data.csv"
+    df = pd.read_csv(input_path, header=None)
+    df = df[[0,1,2,3]]
+    df.columns = ['Rowid', 'Timestamp', 'Anonymized Vehicle number', 'Vehicle type']
+    df.to_csv(out_path, index=False)
+
+def extract_data_from_tsv():
+    input_path = f"{path_to_file}/tollplaza-data.tsv"
+    out_path = f"{path_to_file}/out/tsv_data.csv"
+    df = pd.read_csv(input_path, sep = '\t' ,header=None)
+    df = df[[4,5,6]]
+    df.columns = ['Number of axles', 'Tollplaza id', 'Tollplaza code']
+    df.to_csv(out_path, index=False)
+
+def extract_data_from_fixed_width():
+    input_path = f"{path_to_file}/payment-data.txt"
+    out_path = f"{path_to_file}/out/fixed_width_data.csv"
+    df = pd.read_fwf(input_path, header=None)
+    df = df[[9, 10]]
+    df.columns = ['Type of Payment code', 'Vehicle Code']
+    df.to_csv(out_path, index=False)
+
+def consolidate_data():
+    path_to_csv  = f'{path_to_file}/out/csv_data.csv'
+    path_to_tsv = f'{path_to_file}/out/tsv_data.csv'
+    path_to_fixed_width = f'{path_to_file}/out/fixed_width_data.csv'
+
+    out_path = f'{path_to_file}/out/extracted_data.csv'
+
+    df_csv = pd.read_csv(path_to_csv)
+    df_tsv = pd.read_csv(path_to_tsv)
+    df_fixed_width = pd.read_csv(path_to_fixed_width)
+
+    df = pd.concat([df_csv, df_tsv, df_fixed_width], axis=1)
+    df.to_csv(out_path, index=False)
+
+def transform_data():
+    path_in = f'{path_to_file}/out/extracted_data.csv'
+    out_path = f'{path_to_file}/out/transformed_data.csv'
+    df = pd.read_csv(path_in)
+    df['Vehicle type'] = df['Vehicle type'].map(lambda x: x.upper())
+    df.to_csv( out_path, index=False)
+
 
 
 default_args = {
@@ -90,6 +135,11 @@ transform_data = BashOperator(
     dag=dag 
 )
 
-unzip_data >> [extract_data_from_csv, extract_data_from_tsv, extract_data_from_fixed_width]
-[extract_data_from_csv, extract_data_from_tsv, extract_data_from_fixed_width] >> consolidate_data
-consolidate_data >> transform_data
+unzip_data >> [extract_data_from_csv, extract_data_from_tsv, extract_data_from_fixed_width] >> consolidate_data >> transform_data
+
+
+
+
+
+# 00848875
+# Hani1979
